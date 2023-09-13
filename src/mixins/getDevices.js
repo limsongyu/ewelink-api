@@ -10,28 +10,42 @@ module.exports = {
   async getDevices() {
     const { APP_ID } = this;
 
-    const response = await this.makeRequest({
-      uri: '/user/device',
-      qs: {
-        lang: 'en',
-        appid: APP_ID,
-        ts: timestamp,
-        version: 8,
-        getTags: 1,
-      },
-    });
+    try {
+      let isContinue = true;
+      let beginIndex = -99999;
+      let devicelist = [];
 
-    const error = _get(response, 'error', false);
-    const devicelist = _get(response, 'devicelist', false);
+      while (isContinue) {
+        const response = await this.makeRequest({
+          uri: '/device/thing',
+          qs: {
+            num: 100,
+            beginIndex: beginIndex
+          }
+        });
+    
+        const error = _get(response, 'error', false);
+        const thingList = _get(response, 'data.thingList', false);
+    
+        if (error) {
+          isContinue = false;
+        } else {
+          devicelist = devicelist.concat(thingList);
+          if (thingList.length === 0 || devicelist.length >= response.data?.total) {
+            isContinue = false;
+          } else {
+            beginIndex = thingList[thingList.length - 1].index;
+          }
+        }
+      }
 
-    if (error) {
-      return { error, msg: errors[error] };
+      if (!devicelist) {
+        return { error: 404, msg: errors.noDevices };
+      }
+
+      return devicelist;
+    } catch (err) {
+      return { error: 500, msg: err };
     }
-
-    if (!devicelist) {
-      return { error: 404, msg: errors.noDevices };
-    }
-
-    return devicelist;
   },
 };

@@ -14,7 +14,7 @@ module.exports = {
   async getDeviceChannelCount(deviceId) {
     const device = await this.getDevice(deviceId);
     const error = _get(device, 'error', false);
-    const uiid = _get(device, 'extra.extra.uiid', false);
+    const uiid = _get(device, 'extra.uiid', false);
     const switchesAmount = getDeviceChannelCount(uiid);
 
     if (error) {
