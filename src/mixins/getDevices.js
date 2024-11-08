@@ -29,6 +29,7 @@ module.exports = {
     
         if (error) {
           isContinue = false;
+          return { error: error, msg: errors[error] };
         } else {
           devicelist = devicelist.concat(thingList);
           if (thingList.length === 0 || devicelist.length >= response.data?.total) {
