@@ -35,8 +35,15 @@ module.exports = {
     await wsp.open();
     await wsp.send(payloadLogin);
 
-    setInterval(async () => {
-      await wsp.send('ping');
+    const interval = setInterval(async () => {
+      try{
+        console.log('ping');
+        await wsp.send('ping');
+      } catch (error) {
+        clearInterval(interval);
+        wsp.close();
+        callback({"action": "socket" , "message" : "error", "error": error});
+      }
     }, heartbeat);
 
     return wsp;
